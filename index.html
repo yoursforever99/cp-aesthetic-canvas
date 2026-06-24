@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>CP象征物</title>
+    
+    <!-- 引入截图插件 -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <style>
+        /* ══════════════════════════════════
+           字体引入与精准定义
+           ══════════════════════════════════ */
+        /* 1. 引入霞鹜文楷切片版 */
+        @import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css');
+        /* 2. 引入 Pretendard (无衬线极简现代韩系字体) */
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+
+        :root {
+            /* 英文大标题花体：Beilliant Heavens Demo (古典衬线文艺大写体兜底) */
+            --font-main-en: "Playfair Display", "Didot", "Georgia", serif;
+            /* 英文副标题：Pretendard */
+            --font-sub-en: "Pretendard", -apple-system, sans-serif;
+            /* 名字和象征物标题：方正兰亭刊黑GBK (系统刊黑/兰亭黑/苹方粗体兜底) */
+            --font-name: "FZLanTingKanHei-R-GBK", "Lantinghei SC", "PingFang SC", sans-serif;
+            /* 象征物长句诠释：霞鹜文楷 */
+            --font-interpretation: 'LXGW WenKai Screen', sans-serif;
+            /* 身份概述小字：冬青黑体 (Hiragino Sans GB / 现代细黑兜底) */
+            --font-identity: "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            font-family: var(--font-identity);
+            overflow-x: hidden;
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.9);
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+        .toolbar-btn {
+            background: none; border: none; cursor: pointer; display: flex; align-items: center; color: #555;
+        }
+
+        /* ══════════════════════════════════
+           核心画布布局
+           ══════════════════════════════════ */
+        .poster-canvas {
+            width: 1200px;
+            height: 750px;
+            background: #fdfdfd;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        /* 核心：中间大同框图/背景图 */
+        .center-bg-upload {
+            position: absolute;
+            width: 700px;
+            height: 750px;
+            left: 250px;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1;
+
+            mask-image: linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
+        }
+        .center-bg-upload input { display: none; }
+        .center-bg-img {
+            width: 100%; height: 100%; object-fit: cover;
+            mask-image: linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
+        }
+        .center-placeholder {
+            color: #aaa; font-size: 1.1rem; border: 2px dashed #ddd; padding: 40px; text-align: center;
+        }
+
+        /* 底部中央：双层大英文标题 */
+        .title-group {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 10;
+            width: 100%;
+            pointer-events: none;
+        }
+            .main-title-en {
+    font-family: var(--font-main-en);
+    font-size: 3.2rem;
+    color: #ffffff;
+    letter-spacing: 2px;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
+    
+    /* ✨ 核心大招 1：彻底拔掉点击时的那个高亮外框线 */
+    outline: none !important; 
+    
+    /* ✨ 核心大招 2：限制文字本身的宽度上限，并让它自带紧凑外骨骼 */
+    max-width: 600px; /* 限制名字最大只能这么宽，绝对不准它往两边横向霸道扩张 */
+    margin: 0 auto;   /* 居中 */
+    display: block;
+}
+
+.sub-title-en {
+    font-family: var(--font-sub-en);
+    font-size: 1.1rem;
+    color: #ffffff;
+    margin-top: 8px;
+    letter-spacing: 4px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    pointer-events: auto;
+    
+    /* ✨ 同样强制掐死虚线框 */
+    outline: none !important; 
+    
+    /* ✨ 同样限制最大宽度，防止它摸到两边的卡片 */
+    max-width: 500px;
+    margin: 8px auto 0 auto;
+    display: block;
+}
+
+        /* ══════════════════════════════════
+           左右角色介绍长方框 (磨砂半透明质感)
+           ══════════════════════════════════ */
+        .character-card {
+            position: absolute;
+            width: 320px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(230,230,230,0.7);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.03);
+            backdrop-filter: blur(4px);
+            z-index: 5;
+        }
+        .card-left-bottom { left: 40px; bottom: 40px; }
+        .card-right-top { right: 40px; top: 40px; }
+
+        .char-name {
+            font-family: var(--font-name);
+            font-size: 1.7rem;
+            color: #222;
+            margin-bottom: 4px;
+            outline: none;
+        }
+        .char-identity {
+            font-family: var(--font-identity);
+            font-size: 0.75rem;
+            color: #777;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            outline: none;
+        }
+        .char-intro {
+            font-family: var(--font-interpretation);
+            font-size: 0.85rem;
+            line-height: 1.7;
+            color: #444;
+            outline: none;
+            text-align: justify;
+        }
+
+        /* ══════════════════════════════════
+           左右两组：各三个象征物排布列表
+           ══════════════════════════════════ */
+        .symbols-column {
+            position: absolute;
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 5;
+        }
+        .symbols-left-top { left: 40px; top: 40px; }
+        .symbols-right-bottom { right: 40px; bottom: 40px; }
+
+        .symbol-item { display: flex; align-items: center; gap: 15px; }
+        .symbols-left-top .symbol-item { flex-direction: row; text-align: left; }
+        .symbols-right-bottom .symbol-item { flex-direction: row-reverse; text-align: right; }
+
+        .symbol-img-box {
+            width: 65px;
+            height: 65px;
+            border-radius: 8px;
+            background: #f3f3f3;
+            border: 1px dashed #ccc;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.7rem;
+        }
+        .symbol-img-box input { display: none; }
+
+        .symbol-text { display: flex; flex-direction: column; gap: 4px; }
+        .symbol-title {
+            font-family: var(--font-name);
+            font-size: 1.05rem;
+            color: #222;
+            outline: none;
+        }
+        .symbol-desc {
+            font-family: var(--font-interpretation);
+            font-size: 0.75rem;
+            color: #666;
+            outline: none;
+            white-space: nowrap;
+        }
+
+        /* 截图专用 */
+        .capture-mode .toolbar { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <button class="toolbar-btn" onclick="capture名鉴()" title="导出超清名鉴">
+            <svg viewBox="0 0 24 24" width="24" height="24" style="color: #333; margin-right: 5px;">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="currentColor"/>
+            </svg>
+            <span style="font-size: 0.85rem; font-weight: bold;">生成并保存高清图</span>
+        </button>
+    </div>
+
+    <!-- 画布本体 -->
+    <div class="poster-canvas" id="canvas">
+
+        <!-- 1. 中间核心：同框主背景图 -->
+        <div class="center-bg-upload" onclick="triggerUpload('bg-main')">
+            <input type="file" id="bg-main" accept="image/*" onchange="previewMainImage(this)">
+            <div class="center-placeholder" id="bg-placeholder">
+                📸 点击上传 CP 同框主视觉图<br><span style="font-size:0.75rem; color:#ccc;">(大面积居中柔和淡出)</span>
+            </div>
+        </div>
+
+        <!-- 2. 左上角：角色 A 的三个象征物 -->
+        <div class="symbols-column symbols-left-top">
+            <!-- 象征物 1 -->
+            <div class="symbol-item">
+                <div class="symbol-img-box" onclick="triggerUpload('sym-l-1')">
+                    <input type="file" id="sym-l-1" accept="image/*" onchange="previewSymbol(this)">
+                    <span>传图一</span>
+                </div>
+                <div class="symbol-text">
+                    <div class="symbol-title" contenteditable="true">象征物一</div>
+                    <div class="symbol-desc" contenteditable="true">在这里填入对象征物一的诠释短句</div>
+                </div>
+            </div>
+            <!-- 象征物 2 -->
+            <div class="symbol-item">
+                <div class="symbol-img-box" onclick="triggerUpload('sym-l-2')">
+                    <input type="file" id="sym-l-2" accept="image/*" onchange="previewSymbol(this)">
+                    <span>传图二</span>
+                </div>
+                <div class="symbol-text">
+                    <div class="symbol-title" contenteditable="true">象征物二</div>
+                    <div class="symbol-desc" contenteditable="true">在这里填入对象征物二的诠释短句</div>
+                </div>
+            </div>
+            <!-- 象征物 3 -->
+            <div class="symbol-item">
+                <div class="symbol-img-box" onclick="triggerUpload('sym-l-3')">
+                    <input type="file" id="sym-l-3" accept="image/*" onchange="previewSymbol(this)">
+                    <span>传图三</span>
+                </div>
+                <div class="symbol-text">
+                    <div class="symbol-title" contenteditable="true">象征物三</div>
+                    <div class="symbol-desc" contenteditable="true">在这里填入对象征物三的诠释短句</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 右下角：角色 B 的三个象征物 -->
+        <div class="symbols-column symbols-right-bottom">
+            <!-- 象征物 1 -->
+            <div class="symbol-item">
+                <div class="symbol-img-box" onclick="triggerUpload('sym-r-1')">
+                    <input type="file" id="sym-r-1" accept="image/*" onchange="previewSymbol(this)">
+                    <span>传图一</span>
+                </div>
+                <div class="symbol-text">
+                    <div class="symbol-title" contenteditable="true">象征物一</div>
+                    <div class="symbol-desc" contenteditable="true">在这里填入对象征物一的诠释短句</div>
+                </div>
+            </div>
+            <!-- 象征物 2 -->
+            <div class="symbol-item">
+                <div class="symbol-img-box" onclick="triggerUpload('sym-r-2')">
+                    <input type="file" id="sym-r-2" accept="image/*" onchange="previewSymbol(this)">
+                    <span>传图二</span>
+                </div>
+                <div class="symbol-text">
+                    <div class="symbol-title" contenteditable="true">象征物二</div>
+                    <div class="symbol-desc" contenteditable="true">在这里填入对象征物二的诠释短句</div>
+                </div>
+            </div>
+            <!-- 象征物 3 -->
+            <div class="symbol-item">
+                <div class="symbol-img-box" onclick="triggerUpload('sym-r-3')">
+                    <input type="file" id="sym-r-3" accept="image/*" onchange="previewSymbol(this)">
+                    <span>传图三</span>
+                </div>
+                <div class="symbol-text">
+                    <div class="symbol-title" contenteditable="true">象征物三</div>
+                    <div class="symbol-desc" contenteditable="true">在这里填入对象征物三的诠释短句</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 左下角：角色 A 介绍卡片 -->
+        <div class="character-card card-left-bottom">
+            <div class="char-name" contenteditable="true">角色 A 名字</div>
+            <div class="char-identity" contenteditable="true">点击填入身份概括 / 核心标签</div>
+            <div class="char-intro" contenteditable="true">
+                这里填入关于角色 A 的简单介绍、人设高光或者是经典的内心独白想法。支持自由打字换行，磨砂框背景会自动适配文字长度。
+            </div>
+        </div>
+
+        <!-- 5. 右上角：角色 B 介绍卡片 -->
+        <div class="character-card card-right-top">
+            <div class="char-name" contenteditable="true">角色 B 名字</div>
+            <div class="char-identity" contenteditable="true">点击填入身份概括 / 核心标签</div>
+            <div class="char-intro" contenteditable="true">
+                这里填入关于角色 B 的简单介绍、人设高光或者是经典的内心独白想法。支持自由打字换行，磨砂框背景会自动适配文字长度。
+            </div>
+        </div>
+
+        <!-- 6. 底部中央：大英文花体字 -->
+        <div class="title-group">
+            <div class="main-title-en" contenteditable="true">请输入cp名</div>
+            <div class="sub-title-en" contenteditable="true">请输入 CP 属性 / 关系类型</div>
+        </div>
+
+    </div>
+
+    <script>
+        function triggerUpload(id) {
+            document.getElementById(id).click();
+            event.stopPropagation();
+        }
+
+        function previewMainImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const container = input.parentElement;
+
+                    document.getElementById('bg-placeholder').style.display = 'none';
+
+                    container.style.backgroundImage = `url('${e.target.result}')`;
+                    container.style.backgroundSize = 'cover';
+                    container.style.backgroundPosition = 'center';
+                    container.style.backgroundRepeat = 'no-repeat';
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewSymbol(input) {
+            if (input.files && input.files[0]) {
+
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+
+                    const box = input.parentElement;
+
+                    const span = box.querySelector('span');
+
+                    if (span) {
+                        span.style.display = 'none';
+                    }
+
+                    box.style.backgroundImage = `url('${e.target.result}')`;
+                    box.style.backgroundSize = 'cover';
+                    box.style.backgroundPosition = 'center';
+                    box.style.backgroundRepeat = 'no-repeat';
+
+                    box.style.border = 'none';
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+
+            event.stopPropagation();
+        }
+
+        function capture名鉴() {
+            document.body.classList.add('capture-mode');
+            const editables = document.querySelectorAll('[contenteditable="true"]');
+            editables.forEach(el => el.setAttribute('contenteditable', 'false'));
+
+            window.scrollTo(0, 0);
+
+            setTimeout(() => {
+                html2canvas(document.getElementById('canvas'), {
+                    scale: 3,
+                    useCORS: true
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'cp_character_poster.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                }).finally(() => {
+                    document.body.classList.remove('capture-mode');
+                    editables.forEach(el => el.setAttribute('contenteditable', 'true'));
+                });
+            }, 300);
+        }
+    </script>
+</body>
+</html>
+
