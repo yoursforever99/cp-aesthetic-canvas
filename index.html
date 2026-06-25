@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>CP象征物</title>
+    <title>CP高级名鉴自用画布模板</title>
     
     <!-- 引入截图插件 -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -71,7 +71,7 @@
             overflow: hidden;
         }
 
-        /* 核心：中间大同框图/背景图 */
+        /* 核心：中间大同框图容器（采用背景图防拉伸） */
         .center-bg-upload {
             position: absolute;
             width: 700px;
@@ -83,24 +83,43 @@
             justify-content: center;
             cursor: pointer;
             z-index: 1;
-
-            mask-image: linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
-            -webkit-mask-image: linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
         .center-bg-upload input { display: none; }
-        .center-bg-img {
-            width: 100%; height: 100%; object-fit: cover;
-            mask-image: linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
-            -webkit-mask-image: linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
+        
+        /* 1:1 导出羽化神仙外挂：
+           1. 提到与大图容器平级，确保 z-index 生效
+           2. 使用明确的 RGBA 颜色，彻底抛弃 html2canvas 不认识的 transparent 关键字 */
+        .center-mask {
+            position: absolute;
+            width: 700px;
+            height: 750px;
+            left: 250px;
+            top: 0;
+            /* 100% 兼容 html2canvas 的实体渐变，完美实现左右自然淡出 */
+            background: linear-gradient(to right, 
+                rgba(253, 253, 253, 1) 0%, 
+                rgba(253, 253, 253, 0) 15%, 
+                rgba(253, 253, 253, 0) 85%, 
+                rgba(253, 253, 253, 1) 100%
+            );
+            pointer-events: none; /* 确保不阻碍后面大图的点击上传 */
+            z-index: 3; /* 牢牢压在背景图上方 */
         }
+
         .center-placeholder {
             color: #aaa; font-size: 1.1rem; border: 2px dashed #ddd; padding: 40px; text-align: center;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            z-index: 2;
         }
 
         /* 底部中央：双层大英文标题 */
         .title-group {
             position: absolute;
-            bottom: 40px;
+            bottom: 40px; 
             left: 50%;
             transform: translateX(-50%);
             text-align: center;
@@ -108,40 +127,33 @@
             width: 100%;
             pointer-events: none;
         }
-            .main-title-en {
-    font-family: var(--font-main-en);
-    font-size: 3.2rem;
-    color: #ffffff;
-    letter-spacing: 2px;
-    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    pointer-events: auto;
-    
-    /* ✨ 核心大招 1：彻底拔掉点击时的那个高亮外框线 */
-    outline: none !important; 
-    
-    /* ✨ 核心大招 2：限制文字本身的宽度上限，并让它自带紧凑外骨骼 */
-    max-width: 600px; /* 限制名字最大只能这么宽，绝对不准它往两边横向霸道扩张 */
-    margin: 0 auto;   /* 居中 */
-    display: block;
-}
+        
+        .main-title-en {
+            font-family: var(--font-main-en);
+            font-size: 3.2rem;
+            color: #ffffff;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            pointer-events: auto;
+            outline: none !important; 
+            max-width: 600px; 
+            margin: 0 auto;   
+            display: block;
+        }
 
-.sub-title-en {
-    font-family: var(--font-sub-en);
-    font-size: 1.1rem;
-    color: #ffffff;
-    margin-top: 8px;
-    letter-spacing: 4px;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    pointer-events: auto;
-    
-    /* ✨ 同样强制掐死虚线框 */
-    outline: none !important; 
-    
-    /* ✨ 同样限制最大宽度，防止它摸到两边的卡片 */
-    max-width: 500px;
-    margin: 8px auto 0 auto;
-    display: block;
-}
+        .sub-title-en {
+            font-family: var(--font-sub-en);
+            font-size: 1.1rem;
+            color: #ffffff;
+            margin-top: 8px;
+            letter-spacing: 4px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            pointer-events: auto;
+            outline: none !important; 
+            max-width: 500px;
+            margin: 8px auto 0 auto;
+            display: block;
+        }
 
         /* ══════════════════════════════════
            左右角色介绍长方框 (磨砂半透明质感)
@@ -219,6 +231,9 @@
             justify-content: center;
             color: #999;
             font-size: 0.7rem;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
         .symbol-img-box input { display: none; }
 
@@ -262,6 +277,9 @@
                 📸 点击上传 CP 同框主视觉图<br><span style="font-size:0.75rem; color:#ccc;">(大面积居中柔和淡出)</span>
             </div>
         </div>
+        
+        <!-- 核心重构：将羽化蒙版提取出来作为平级独立图层，彻底解决 html2canvas 无法导出 mask 渐变的 bug -->
+        <div class="center-mask"></div>
 
         <!-- 2. 左上角：角色 A 的三个象征物 -->
         <div class="symbols-column symbols-left-top">
@@ -372,48 +390,31 @@
         function previewMainImage(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-
                 reader.onload = function(e) {
                     const container = input.parentElement;
-
                     document.getElementById('bg-placeholder').style.display = 'none';
-
+                    
+                    // 使用 background-image 承载主图，防拉伸
                     container.style.backgroundImage = `url('${e.target.result}')`;
-                    container.style.backgroundSize = 'cover';
-                    container.style.backgroundPosition = 'center';
-                    container.style.backgroundRepeat = 'no-repeat';
-                };
-
+                }
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
         function previewSymbol(input) {
             if (input.files && input.files[0]) {
-
                 const reader = new FileReader();
-
                 reader.onload = function(e) {
-
                     const box = input.parentElement;
-
                     const span = box.querySelector('span');
-
-                    if (span) {
-                        span.style.display = 'none';
-                    }
-
+                    if(span) span.style.display = 'none';
+                    
+                    // 象征物小图，防变形
                     box.style.backgroundImage = `url('${e.target.result}')`;
-                    box.style.backgroundSize = 'cover';
-                    box.style.backgroundPosition = 'center';
-                    box.style.backgroundRepeat = 'no-repeat';
-
                     box.style.border = 'none';
-                };
-
+                }
                 reader.readAsDataURL(input.files[0]);
             }
-
             event.stopPropagation();
         }
 
@@ -442,4 +443,3 @@
     </script>
 </body>
 </html>
-
